@@ -24,7 +24,7 @@ Development only (not shipped): TypeScript (Apache-2.0), esbuild (MIT, (c) 2020 
 - **Fixation Display** is a Modified Version of **Atkinson Hyperlegible Next ExtraBold**, Copyright 2020-2024 The
   Atkinson Hyperlegible Next Project Authors (https://github.com/googlefonts/atkinson-hyperlegible-next). Changes:
   round dots redrawn as rings, display spacing, CFF outlines, new name. Built by `fonts/build.py` with fontTools.
-  Licence: `fonts/dist/OFL-FixationDisplay.txt`. The upstream font declares no Reserved Font Name; the modified font
+  Licence: `web/fonts/OFL-FixationDisplay.txt`. The upstream font declares no Reserved Font Name; the modified font
   is renamed anyway.
 - **Atkinson Hyperlegible Next** (Regular, SemiBold) and **Atkinson Hyperlegible Mono** (Regular, Medium),
   unmodified apart from subsetting, from https://github.com/googlefonts/atkinson-hyperlegible-next and

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stillfield</title>
+<meta name="description" content="Screen videos and GIFs for flashing over the WCAG 2.2 SC 2.3.1 seizure thresholds, in your browser. Nothing is uploaded.">
+<meta name="color-scheme" content="light">
+<link rel="preload" href="fonts/FixationDisplay-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/AtkinsonHyperlegibleNext-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="rail">
+  <a class="wordmark" href="#top" aria-label="Stillfield home">Stillfield</a>
+  <nav aria-label="Sections">
+    <a href="#top" aria-current="page">Screen</a>
+    <a href="#how">How it works</a>
+    <a href="#cli">Command line</a>
+  </nav>
+</header>
+
+<main id="top" class="screen">
+  <aside class="intake" aria-label="Choose what to screen">
+    <form id="drop" class="drop">
+      <input id="file" type="file" accept="video/*,image/gif,.gif,.mp4,.mov,.webm,.m4v,.mkv" class="sr-only">
+      <label for="file" class="drop-target">
+        <svg class="drop-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" /><circle cx="24" cy="24" r="6" /><path d="M24 1v8M24 39v8M1 24h8M39 24h8" /></svg>
+        <span class="drop-title">Drop a video or GIF</span>
+        <span class="button button-quiet">Choose a file</span>
+      </label>
+    </form>
+
+    <form id="url-form" class="url-form">
+      <label for="url">Media URL</label>
+      <div class="field-row">
+        <input id="url" type="url" inputmode="url" placeholder="https://example.com/clip.mp4" autocomplete="off" spellcheck="false">
+        <button class="button" type="submit">Screen</button>
+      </div>
+    </form>
+
+    <fieldset class="settings">
+      <legend>Settings</legend>
+      <label for="display">Shown at</label>
+      <select id="display">
+        <option value="auto" selected>Auto: video full screen, GIF at its size</option>
+        <option value="fullscreen">Full screen, 1024 x 768</option>
+        <option value="native">Its own pixel size</option>
+        <option value="1280x720">Fit in 1280 x 720 CSS px</option>
+        <option value="1920x1080">Fit in 1920 x 1080 CSS px</option>
+      </select>
+      <label for="area">Area rule</label>
+      <select id="area">
+        <option value="wcag" selected>WCAG: 25% of any 10 degree field</option>
+        <option value="understanding">Understanding note: 87,296 CSS px</option>
+        <option value="frame">Broadcast: 25% of the frame</option>
+      </select>
+      <label for="fps">Video sample rate</label>
+      <select id="fps">
+        <option value="auto" selected>Auto: the video's own rate, up to 60 fps</option>
+        <option value="24">24 fps</option>
+        <option value="25">25 fps</option>
+        <option value="30">30 fps</option>
+        <option value="50">50 fps</option>
+        <option value="60">60 fps</option>
+      </select>
+    </fieldset>
+
+    <section class="samples" aria-labelledby="samples-title">
+      <h2 id="samples-title">Synthetic test clips</h2>
+      <ul id="samples"></ul>
+    </section>
+    <p class="privacy">Files are screened on this computer. Nothing is uploaded, and nothing you drop is played.</p>
+  </aside>
+
+  <section id="result" class="result" aria-live="polite" aria-busy="false">
+    <div id="empty" class="empty">
+      <h1 class="empty-title">Drop a file to screen it.</h1>
+      <figure class="rule-figure">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="rule-fig-title">
+          <title id="rule-fig-title">The 2.3.1 rule: content fails when more than 3 flashes in one second cover more than a quarter of a 341 by 256 CSS pixel field.</title>
+          <rect class="fig-screen" x="1" y="1" width="398" height="298" rx="3" />
+          <rect class="fig-field" x="110" y="80" width="170" height="128" />
+          <rect class="fig-quarter" x="110" y="80" width="85" height="64" />
+          <circle class="fig-fix" cx="195" cy="144" r="9" />
+          <circle class="fig-fix-dot" cx="195" cy="144" r="3" />
+          <path class="fig-lead" d="M280 92 H420" />
+          <path class="fig-lead" d="M195 112 V40 H420" />
+          <path class="fig-lead" d="M110 250 H420" />
+        </svg>
+        <figcaption>
+          <dl class="rule-list">
+            <div style="--y: 40"><dt>More than 3 flashes</dt><dd>in any one second</dd></div>
+            <div style="--y: 92"><dt>341 x 256 CSS px</dt><dd>a 10 degree field at the 1024 x 768 reference</dd></div>
+            <div style="--y: 250"><dt>Over 21,824 CSS px</dt><dd>a quarter of that field, flashing together</dd></div>
+          </dl>
+        </figcaption>
+      </figure>
+    </div>
+
+    <div id="busy" class="busy" hidden>
+      <h1 id="busy-title" class="busy-title">Screening</h1>
+      <p id="busy-name" class="busy-name mono"></p>
+      <div class="meter" role="progressbar" aria-labelledby="busy-title" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="meter-fill"></span></div>
+      <p id="busy-detail" class="mono"></p>
+      <button id="cancel" class="button button-quiet" type="button">Stop</button>
+    </div>
+
+    <div id="error" class="error" role="alert" hidden>
+      <h1 class="error-title">Could not screen this</h1>
+      <p id="error-text"></p>
+      <pre id="error-cli" class="code" hidden></pre>
+    </div>
+
+    <article id="report" class="report" hidden>
+      <header class="verdict-row">
+        <h1 id="verdict" class="verdict"></h1>
+        <dl id="figures" class="figures"></dl>
+      </header>
+      <ul id="reasons" class="reasons"></ul>
+      <p id="media-line" class="media-line mono"></p>
+
+      <section class="panel" aria-labelledby="rate-title">
+        <div class="panel-head">
+          <h2 id="rate-title">Flashes per second over an area above the limit</h2>
+          <div class="legend" id="rate-legend"></div>
+        </div>
+        <div id="rate-chart" class="chart"></div>
+        <h2 class="sub-title" id="area-title">Area flashing more than 3 times a second, share of the limit</h2>
+        <div id="area-chart" class="chart chart-short"></div>
+      </section>
+
+      <section class="panel split" aria-labelledby="windows-title">
+        <div class="windows">
+          <h2 id="windows-title">Worst windows</h2>
+          <div class="table-wrap">
+            <table id="windows">
+              <thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Kind</th><th scope="col" class="num">Per second</th><th scope="col" class="num">Area, CSS px</th><th scope="col" class="num">Of limit</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p id="windows-empty" class="quiet" hidden>No stretch came near the thresholds.</p>
+        </div>
+        <figure class="field" aria-labelledby="field-title">
+          <h2 id="field-title">Field at the worst moment</h2>
+          <div class="field-pair">
+            <canvas id="still" class="still" width="320" height="240" role="img" aria-label="Still frame at the worst moment, with the 10 degree field marked"></canvas>
+            <canvas id="fieldmap" class="fieldmap" width="440" height="330" role="img" aria-label="Map of flashes per second in each part of the field"></canvas>
+          </div>
+          <div class="legend field-legend"><span><i class="dot"></i>More than 3 flashes a second</span><span><i class="dot dot-slow"></i>Flashing, slower</span><span>Numbers: most flashes a second in each part</span></div>
+          <figcaption id="field-caption" class="mono"></figcaption>
+        </figure>
+      </section>
+
+      <section class="panel" aria-labelledby="fix-title">
+        <div class="panel-head">
+          <h2 id="fix-title">Reduced flash filter</h2>
+          <div class="legend" id="fix-legend"></div>
+        </div>
+        <div class="fix-grid">
+          <div>
+            <p id="fix-verdict" class="fix-verdict"></p>
+            <div id="fix-chart" class="chart chart-short"></div>
+          </div>
+          <div class="stills">
+            <figure><canvas id="still-before" class="still" width="320" height="240"></canvas><figcaption>Before</figcaption></figure>
+            <figure><canvas id="still-after" class="still" width="320" height="240"></canvas><figcaption>After the filter</figcaption></figure>
+          </div>
+        </div>
+        <p class="quiet">The browser filters the frames it screened. To write a file and screen the written file, run</p>
+        <pre id="fix-cli" class="code"></pre>
+      </section>
+
+      <div class="report-actions">
+        <button id="download-json" class="button button-quiet" type="button">Download the report as JSON</button>
+        <button id="again" class="button button-quiet" type="button">Screen another file</button>
+      </div>
+    </article>
+  </section>
+</main>
+
+<section id="how" class="read">
+  <h2>How it works</h2>
+  <div class="read-cols">
+    <p>Each frame is averaged into 2 x 2 CSS px cells in linear light. Every cell tracks its relative luminance and its colour. A change of 0.1 or more, with the darker state under 0.8, is a transition; a change of more than 0.2 in CIE 1976 u'v' to or from a saturated red is a red transition. A flash is two transitions.</p>
+    <p>A cell that makes 7 or more transitions inside one second is flashing more than 3 times a second. The screen fails when those cells cover more than 21,824 CSS px inside any 341 x 256 CSS px field: the normative WCAG 2.2 reading, which is stricter than the 87,296 CSS px in the Understanding note.</p>
+    <p>Video is screened full screen at the 1024 x 768 reference unless you choose a size; GIFs at their own size, looped. Two flashes a second held for 4 s is reported as a warning, as IRIS and ITU-R BT.1702 do, without changing the WCAG result.</p>
+  </div>
+</section>
+
+<section id="cli" class="read">
+  <h2>Command line, CI and agents</h2>
+  <div class="read-cols code-cols">
+    <div><h3>Screen a file or page</h3><pre class="code">stillfield clip.mp4
+stillfield https://example.com --duration 10
+stillfield intro.gif --json</pre></div>
+    <div><h3>Write a reduced flash version</h3><pre class="code">stillfield clip.mp4 --fix</pre></div>
+    <div><h3>GitHub Action</h3><pre class="code">- uses: actions/checkout@v4
+  with: { fetch-depth: 2 }
+- uses: draarivpatel-ui/stillfield@v0.1.0</pre></div>
+    <div><h3>MCP server</h3><pre class="code">{ "mcpServers": { "stillfield":
+  { "command": "stillfield-mcp" } } }</pre></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <p>Stillfield screens content against the WCAG 2.2 SC 2.3.1 flash thresholds. It is not medical advice and not a certification. A pass means nothing over the thresholds was found under the tested conditions.</p>
+  <p>Type: Fixation Display, a modified Atkinson Hyperlegible Next, with Atkinson Hyperlegible Next and Mono (SIL Open Font License).</p>
+</footer>
+
+<script type="module" src="assets/main.js"></script>
+</body>
+</html>

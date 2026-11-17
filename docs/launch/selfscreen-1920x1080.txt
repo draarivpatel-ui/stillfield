@@ -1,0 +1,7 @@
+launch-film-1920x1080.mp4: 1920 x 1080, 43.23 s, 1297 frames at 30.00 fps
+screened at 1024 x 576 CSS px; area rule "wcag": more than 21,824 CSS px flashing together in any 341 x 256 CSS px field (searched with a 344 x 256 window)
+PASS  WCAG 2.2 SC 2.3.1 screen: passes
+  general flashes: up to 1.5 a second over an area above the limit; largest area flashing more than 3 times a second: 6,532 CSS px (30% of the limit)
+  red flashes:     up to 0.5 a second over an area above the limit
+  note  Decoded by ffmpeg and treated as sRGB.
+Stillfield screens content against the WCAG 2.2 SC 2.3.1 flash thresholds. It is not medical advice and not a certification. A pass means no flashing over the thresholds was found under the tested conditions; it does not guarantee that content cannot trigger a seizure.

@@ -1,0 +1,7 @@
+.scratch/
+node_modules/
+dist/
+*.log
+.DS_Store
+test/.out/
+web/assets/

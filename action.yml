@@ -1,0 +1,62 @@
+name: Stillfield
+description: Screens videos and GIFs changed in a pull request for flashing over the WCAG 2.2 SC 2.3.1 thresholds. A screen, not a certification.
+branding:
+  icon: eye
+  color: orange
+inputs:
+  paths:
+    description: Files or glob patterns to screen, one per line. Empty means the media files changed by this push or pull request (check out with fetch-depth 2).
+    required: false
+    default: ''
+  extensions:
+    description: File extensions treated as media when finding changed files.
+    required: false
+    default: 'mp4 mov m4v webm mkv avi gif'
+  area:
+    description: Area rule, wcag (25% of any 341 x 256 CSS px field), understanding (87,296 CSS px) or frame (25% of the frame).
+    required: false
+    default: wcag
+  display:
+    description: Size the media is shown at, CSS px (like 1280x720), or auto, native, fullscreen.
+    required: false
+    default: auto
+  fail-on:
+    description: fail (default) fails the job on a WCAG 2.3.1 failure; warn also fails it on warnings.
+    required: false
+    default: fail
+  sarif:
+    description: Where to write SARIF results (upload them with github/codeql-action/upload-sarif if you want code scanning alerts).
+    required: false
+    default: stillfield.sarif
+outputs:
+  verdict:
+    description: Worst verdict across the screened files (pass, warn or fail; none when nothing was screened).
+    value: ${{ steps.screen.outputs.verdict }}
+  sarif:
+    description: Path of the SARIF file.
+    value: ${{ steps.screen.outputs.sarif }}
+runs:
+  using: composite
+  steps:
+    - name: Install ffmpeg if missing
+      shell: bash
+      run: |
+        if ! command -v ffmpeg >/dev/null; then
+          if command -v apt-get >/dev/null; then sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg;
+          elif command -v brew >/dev/null; then brew install ffmpeg;
+          else echo "::warning::ffmpeg not found; videos cannot be screened (GIFs still can)"; fi
+        fi
+    - name: Install Stillfield
+      shell: bash
+      run: cd "$GITHUB_ACTION_PATH" && npm ci --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund --loglevel=error
+    - name: Screen media
+      id: screen
+      shell: bash
+      env:
+        INPUT_PATHS: ${{ inputs.paths }}
+        INPUT_EXTENSIONS: ${{ inputs.extensions }}
+        INPUT_AREA: ${{ inputs.area }}
+        INPUT_DISPLAY: ${{ inputs.display }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_SARIF: ${{ inputs.sarif }}
+      run: node "$GITHUB_ACTION_PATH/src/action.ts"

@@ -1,0 +1,51 @@
+{
+  "name": "stillfield",
+  "version": "0.1.0",
+  "description": "Screens video, GIFs and web pages for flashing that can trigger photosensitive seizures (WCAG 2.2 SC 2.3.1). Not a certification.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "stillfield": "dist/cli.js",
+    "stillfield-mcp": "dist/mcp.js"
+  },
+  "exports": {
+    ".": "./dist/core/index.js",
+    "./core": "./dist/core/index.js",
+    "./node": "./dist/node/index.js"
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "SPEC.md",
+    "THIRD_PARTY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --test-concurrency=1 test/*.test.ts",
+    "test:unit": "node --test test/color.test.ts test/analyzer.test.ts test/gif.test.ts",
+    "prepare": "tsc -p tsconfig.json",
+    "build:web": "esbuild web/src/main.ts web/src/worker.ts --bundle --format=esm --outdir=web/assets --minify --target=es2022 --legal-comments=linked",
+    "typecheck:web": "tsc -p web/tsconfig.json"
+  },
+  "dependencies": {
+    "omggif": "1.0.10",
+    "pngjs": "7.0.0"
+  },
+  "optionalDependencies": {
+    "playwright-core": "1.60.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@types/node": "26.6.6",
+    "@types/omggif": "1.0.5",
+    "@types/pngjs": "6.0.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
